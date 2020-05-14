@@ -1,5 +1,5 @@
 # FileProviderDemo
-iOS FileProvider Api Test
+项目中有这个需求，暂时从网络上没找到好的可以直接运行的demo，所以自己先写了个简单的，代码添加了一些注释，有误望指出，共同学习！
 
  App就展示一个空白页面，主要从系统File进入后打开ProviderTest展示列表以及操作等；
 
