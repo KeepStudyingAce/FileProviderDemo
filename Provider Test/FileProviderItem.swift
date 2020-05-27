@@ -18,11 +18,11 @@ class FileProviderItem: NSObject {
 }
 
 extension FileProviderItem: NSFileProviderItem {
-    //MARK: -文件唯一标识
+    //MARK: -文件列表单个文件的唯一标识，一般会把需要展示的信息一起拼接成字符串编码后作为唯一标识,长度太长系统会穿件placeholder失败，FileProviderExtension中有解决办法
   var itemIdentifier: NSFileProviderItemIdentifier {
     return reference.itemIdentifier
   }
-  
+  //MARK:文件列表单个文件的父目录Identifier，如果该目录下文件显示不全，可能是部分文件的parentItemIdentifier错误。某一目录下的所有文件的parentItemIdentifier一定相同；
   var parentItemIdentifier: NSFileProviderItemIdentifier {
     return reference.parentReference?.itemIdentifier ?? itemIdentifier
   }
@@ -32,7 +32,7 @@ extension FileProviderItem: NSFileProviderItem {
     return reference.filename
   }
   
-  //MARK: -列表显示的文件类型，系统有一系列的文件类型图标对应
+  //MARK: -用于展示文件名称前面的图标，系统枚举值，需要一一对应(必须一一对应正确的格式下载成功后才能打开系统支持打开的文件)。
   var typeIdentifier: String {
     return reference.typeIdentifier
   }

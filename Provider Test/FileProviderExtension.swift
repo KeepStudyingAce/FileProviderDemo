@@ -11,25 +11,27 @@ import FileProvider
 class FileProviderExtension: NSFileProviderExtension {
     
     var fileManager = FileManager()
+    #warning("仅仅作为NSFileProviderItemIdentifier过长时候的解决办法")
+    var nameTooLongSaveDic:Dictionary<String,String> = [:];
     
     override init() {
         super.init()
     }
     
+    #warning("界面渲染的时候会调用")
     override func item(for identifier: NSFileProviderItemIdentifier) throws -> NSFileProviderItem {
          print("ItemForidentifier")
         // 根据identifier返回一个Item
         guard let reference = ItemReference(itemIdentifier: identifier) else {
           throw NSError.fileProviderErrorForNonExistentItem(withIdentifier: identifier)
         }
-        // TODO: implement the actual lookup
         return FileProviderItem(reference: reference)
     }
     
+    #warning("以下四个函数用于在本地创建一个对应的目录")
     //MARK:-  根据identifier初始化一个本地对应位置代表文件，并将本地位置返回
     override func urlForItem(withPersistentIdentifier identifier: NSFileProviderItemIdentifier) -> URL? {
         
-        // resolve the given identifier to a file on disk
         guard let item = try? item(for: identifier) else {
             return nil
         }
@@ -37,16 +39,20 @@ class FileProviderExtension: NSFileProviderExtension {
         // 构造本地存储的URL： <base storage directory>/<item identifier>/<item file name>
         let manager = NSFileProviderManager.default
         let perItemDirectory = manager.documentStorageURL.appendingPathComponent(identifier.rawValue, isDirectory: true)
+        #warning("处理过长的的identifier")
+//        nameTooLongSaveDic[arr.last!] = identifier.rawValue;
         print("UrlFroItem")
         return perItemDirectory.appendingPathComponent(item.filename, isDirectory:false)
     }
     
     // MARK:- 每个URL（本地文件的位置）对应的唯一标识
     override func persistentIdentifierForItem(at url: URL) -> NSFileProviderItemIdentifier? {
-        // resolve the given URL to a persistent identifier using a database
+        
         print("persistentIdentifierForItem")
         let identifier = url.deletingLastPathComponent().lastPathComponent
         return NSFileProviderItemIdentifier(identifier)
+        #warning("读取过长的NSFileProviderItemIdentifier，并返回")
+//        return NSFileProviderItemIdentifier(nameTooLongSaveDic[pathComponents[pathComponents.count - 2]]!)
     }
     
     // MARK:- 以下两个方法都是为虚拟文件创建对应的本地存储位置
@@ -58,7 +64,7 @@ class FileProviderExtension: NSFileProviderExtension {
         else {
           throw FileProviderError.unableToFindMetadataForPlaceholder
       }
-      
+      #warning("此处注意，URL中ItemIdentifier可能包含太多文件信息，导致长度太长，createDirectory创建目录时名字太长会导致创建失败;添加属性nameTooLongSaveDic解决该问题")
       try fileManager.createDirectory(
         at: url.deletingLastPathComponent(),
         withIntermediateDirectories: true,
@@ -84,7 +90,9 @@ class FileProviderExtension: NSFileProviderExtension {
            }
     }
     
-    //MARK:- 可以处理缩略图下载显示等问题
+    
+    #warning("数据处理：缩略图下载，文件下载等")
+    //MARK:- 可以处理图片/文件下载显示等问题
     override func startProvidingItem(at url: URL, completionHandler: @escaping ((_ error: Error?) -> Void)) {
         print("startProvidingItem")
         guard !fileManager.fileExists(atPath: url.path) else {
@@ -100,7 +108,7 @@ class FileProviderExtension: NSFileProviderExtension {
             return
         }
         
-        // 处理缩略图
+        // 下载图片
 //         let name = reference.filename
 //       let path = reference.containingDirectory
 //       NetworkClient.shared.downloadMediaItem(named: name, at: path, isPreview: false) { fileURL, error in
@@ -108,7 +116,7 @@ class FileProviderExtension: NSFileProviderExtension {
 //           completionHandler(error)
 //           return
 //         }
-//
+// // MARK:- 完成后的回调
 //         do { //将下载的文件移动到相应位置
 //           try self.fileManager.moveItem(at: fileURL, to: url)
 //           completionHandler(nil)
@@ -117,6 +125,41 @@ class FileProviderExtension: NSFileProviderExtension {
 //         }
 //       }
     }
+    
+    #warning("文件导入/上传文件时候的回调,返回一个NSFileProviderItem即代表成功导入/上传")
+  override func importDocument(at fileURL: URL, toParentItemIdentifier parentItemIdentifier: NSFileProviderItemIdentifier, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) {
+//    guard let reference = ItemReference(itemIdentifier: parentItemIdentifier) else {
+//             print(" importDocument ItemForidentifier Error", parentItemIdentifier)
+//            completionHandler(nil, FileProviderError.noContentFromServer)
+//            return
+//          }
+//    let tool = UploadTool.init()
+//    // 名称从url中取，path需要判断是不是根目录，否则reference.kodSourcePath不一定有值
+//    var path = reference.kodSourcePath;
+//    if (reference.path == "/") {
+//      let homePath = UserDefaults.init(suiteName: "group.com.kodcloud.kodbox")?.object(forKey: "homePath") ?? "/";
+//      path = homePath as! String;
+//    }
+//    var urlTemp = fileURL.absoluteString;
+//    if (urlTemp.hasPrefix("file:///")){
+//      let endIndex = urlTemp.index(urlTemp.startIndex, offsetBy: 7);
+//      urlTemp.removeSubrange(urlTemp.startIndex...endIndex);
+//      print("导入文件的本地路径" + urlTemp);
+//    }
+////    tool.startUploadFileName(fileURL.lastPathComponent, path: path, fileUrl: urlTemp)
+//    tool.startUploadFileName(fileURL.lastPathComponent, path: path, fileUrl: urlTemp) { (pathNew) -> UnsafeMutableRawPointer? in
+//      print("上传文件成功" + (pathNew ?? "Fuck FileUpload"));
+//      let type = fileURL.lastPathComponent.components(separatedBy: ".").last;
+//      var infoString = "file|" + fileURL.lastPathComponent + "|" + (type ?? "") + "||"
+//      infoString = infoString  +  "\(Date().timeIntervalSince1970)" + "|" +  (pathNew ?? "")
+//      let refer = ItemReference.init(path: pathNew ?? "", filename: fileURL.lastPathComponent, infoString: infoString)
+//      let item = FileProviderItem.init(reference: refer)
+//      completionHandler(item, nil)
+//      return nil
+//    }
+    
+  }
+      
     
     
     override func itemChanged(at url: URL) {
@@ -130,7 +173,7 @@ class FileProviderExtension: NSFileProviderExtension {
          - register the NSURLSessionTask with NSFileProviderManager to provide progress updates
          */
     }
-    
+    #warning("推出后将目录下的占位符清空")
     override func stopProvidingItem(at url: URL) {
         print("stopProvidingItem")
         try? fileManager.removeItem(at: url)
@@ -154,7 +197,7 @@ class FileProviderExtension: NSFileProviderExtension {
 //        }
     }
     
-    // MARK: - 页面目录更改的时候会调用这个方法 返回一个新的FileProviderEnumerator以提供数据
+    #warning("目录切换时返回唯一的FileProviderEnumerator以处理数据")
     override func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier) throws -> NSFileProviderEnumerator {
         if (containerItemIdentifier == NSFileProviderItemIdentifier.rootContainer) {
             // TODO: instantiate an enumerator for the container root
@@ -172,6 +215,56 @@ class FileProviderExtension: NSFileProviderExtension {
         }
         return FileProviderEnumerator(path: ref.path)
     }
+    
+    #warning("缩略图的下载，同时下载当前界面所有的缩略图，每个下载作为一个Progress返回，异步处理所有请求")
+     override func fetchThumbnails(
+        for itemIdentifiers: [NSFileProviderItemIdentifier],
+        requestedSize size: CGSize,
+        perThumbnailCompletionHandler: @escaping (NSFileProviderItemIdentifier, Data?, Error?) -> Void,
+        completionHandler: @escaping (Error?) -> Void)
+          -> Progress {
+           
+//        print("PrefetchThumbnails")
+        let progress = Progress(totalUnitCount: Int64(itemIdentifiers.count))
+//
+//        for itemIdentifier in itemIdentifiers {
+//          let itemCompletion: (Data?, Error?) -> Void = { data, error in
+//            perThumbnailCompletionHandler(itemIdentifier, data, error)
+//
+//            if progress.isFinished {
+//              DispatchQueue.main.async {
+//                completionHandler(nil)
+//              }
+//            }
+//          }
+//
+//          guard
+//            let reference = ItemReference(itemIdentifier: itemIdentifier),
+//            !reference.isDirectory
+//            else {
+//              progress.completedUnitCount += 1
+//              let error = NSError.fileProviderErrorForNonExistentItem(withIdentifier: itemIdentifier)
+//              itemCompletion(nil, error)
+//              continue
+//          }
+//         print("fetchThumbnails",reference.fileInfo)
+//         let task = NetworkManage.shared.getThumbSquare(atPath: reference.kodSourcePath) { url, error in
+//
+//            guard
+//              let url = url,
+//              let data = try? Data(contentsOf: url, options: .alwaysMapped)
+//              else {
+//                itemCompletion(nil, error)
+//                return
+//            }
+//            itemCompletion(data, nil)
+//          }
+//
+//          progress.addChild(task.progress, withPendingUnitCount: 1)
+//        }
+//
+        return progress
+      }
 
 }
 

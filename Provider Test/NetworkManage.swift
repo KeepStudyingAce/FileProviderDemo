@@ -16,6 +16,12 @@ final class NetworkManage {
 
   private let session: URLSession = .shared
   
+    #warning("如果需要与主程序数据交互，沙盒使用示例如下")
+    /*
+     需要先将Target中主程序和Extension分别添加App Group能力，在Target中选中项目后Signing && Capabilities中添加同一组
+     let userDefaults = UserDefaults.init(suiteName: "group.com.kodcloud.kodbox")
+     let accessToken = userDefaults?.object(forKey: "accessToken")
+     */
   private func buildURL() -> URLRequest {
     /*
      这是LeanCloud上模拟的数据

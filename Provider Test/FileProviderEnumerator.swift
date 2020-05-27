@@ -16,8 +16,9 @@ import FileProvider
 
 class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     
-     private let path: String
-     private var currentTask: URLSessionTask?
+    private let path: String
+    private var page: Int = 1
+    private var currentTask: URLSessionTask?
     private var currentItems: [FileProviderItem]?
     private var currentAnchor: NSFileProviderSyncAnchor?
 
@@ -50,10 +51,16 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
               }
               self.currentItems = items;
               observer.didEnumerate(items)
-                //有分页的话传入页数，没有的话传入nil，传入页数后系统在用户滑动到底部时会自动再调用这个函数
-    //            var myInt = 1
-    //            let myIntData = Data(bytes: &myInt, count: MemoryLayout.size(ofValue: myInt))
-    //            observer.finishEnumerating(upTo: NSFileProviderPage(rawValue: myIntData))
+                //存在分页的话判断数据传入页数，没有的话传入nil，传入页数后系统在用户滑动到底部时会自动再调用这个函数,自测好像进入界面就会将所有数据都加载出来，自动调用分业
+//                if ((self.currentItems.count <= PAGESIZE){
+//                  observer.finishEnumerating(upTo: nil)
+//                } else {
+//                    self.page += 1
+//                    var myInt = self.page
+//                    let myIntData = Data(bytes: &myInt, count: MemoryLayout.size(ofValue: myInt))
+//                    observer.finishEnumerating(upTo: NSFileProviderPage(rawValue: myIntData))
+//                  }
+//                }
                 
                 observer.finishEnumerating(upTo: nil)
             }
@@ -66,6 +73,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
         }
     }
     
+    #warning("目录下有文件导入或者删除时会调用，本demo中没有使用，自己项目中也没使用这个函数")
     func enumerateChanges(for observer: NSFileProviderChangeObserver, from anchor: NSFileProviderSyncAnchor) {
         /* TODO:
          For directories. The system requests an enumerator when a document browser displays the contents of a directory. For performance reasons, the system may retain the enumerator even after the browser has moved to a different directory.
